@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cloudways Velocity — Managed Node.js Hosting</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#050318;
+    --bg-soft:#0A0620;
+    --bg-card:#161326;
+    --ink:#F5F4FA;
+    --ink-muted:#B7B3CB;
+    --ink-faint:#8983A6;
+    --accent:#3139B8;
+    --accent-dark:#262F92;
+    --accent-bright:#986EF5;
+    --accent-soft:rgba(152,110,245,0.12);
+    --accent-line:rgba(152,110,245,0.35);
+    --line:#2A2740;
+    --white:#ffffff;
+    --radius:16px;
+    --shadow:none;
+    --maxw:1180px;
+    font-size:16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    line-height:1.5;
+  }
+  h1,h2,h3{
+    font-family:'Poppins',system-ui,sans-serif;
+    color:var(--ink);
+    margin:0;
+    letter-spacing:-0.01em;
+  }
+  a{color:inherit;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 28px;}
+  section{padding:96px 0;}
+  @media (max-width:720px){ section{padding:64px 0;} }
+
+  /* ---------- NAV ---------- */
+  .nav{
+    position:sticky;top:0;z-index:50;
+    background:rgba(5,3,24,0.75);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav .wrap{display:flex;align-items:center;justify-content:space-between;padding:16px 28px;gap:24px;}
+  .nav-links{display:flex;align-items:center;gap:28px;flex:1;justify-content:center;}
+  .nav-links a{font-size:14px;font-weight:600;color:var(--ink-muted);text-decoration:none;}
+  .nav-links a:hover{color:var(--accent);}
+  @media (max-width:820px){.nav-links{display:none;}}
+  .nav-ctas{display:flex;align-items:center;gap:18px;}
+  .nav-login{font-size:14px;font-weight:600;color:var(--ink-muted);text-decoration:none;}
+  .nav-login:hover{color:var(--accent);}
+  @media (max-width:560px){.nav-login{display:none;}}
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand .mark{width:30px;height:30px;border-radius:9px;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .brand .mark svg{width:16px;height:16px;stroke:#fff;}
+  .brand-text{display:flex;flex-direction:column;line-height:1.15;}
+  .brand-text .name{font-weight:600;font-size:17px;font-family:'Poppins';color:var(--ink);}
+  .brand-text .sub{color:var(--ink-faint);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;}
+  .btn{
+    display:inline-flex;align-items:center;gap:8px;
+    background:var(--accent);color:#fff;border:none;
+    padding:12px 22px;border-radius:100px;font-weight:600;font-size:14.5px;
+    cursor:pointer;transition:background .15s ease, transform .15s ease;
+    text-decoration:none;
+  }
+  .btn:hover{background:var(--accent-dark);}
+  .btn:focus-visible{outline:2px solid var(--accent-dark);outline-offset:2px;}
+  .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);}
+  .btn.ghost:hover{border-color:var(--accent-bright);color:var(--accent-bright);background:transparent;}
+  .btn.small{padding:9px 16px;font-size:13.5px;}
+  .btn.invert{background:#fff;color:var(--bg);}
+  .btn.invert:hover{background:#E4E1F5;}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;overflow:hidden;
+    background:
+      radial-gradient(ellipse 1000px 600px at 8% -10%, rgba(76,42,180,0.55), transparent 60%),
+      radial-gradient(ellipse 800px 500px at 60% 0%, rgba(50,20,140,0.4), transparent 55%),
+      var(--bg);
+    padding:80px 0 64px;
+    text-align:center;
+  }
+  .product-tag{
+    display:inline-flex;align-items:center;gap:8px;margin-bottom:20px;
+    font-size:13px;font-weight:600;color:var(--ink-muted);
+  }
+  .product-tag .name{color:var(--accent-bright);font-weight:700;}
+  .product-tag .divider-dot{width:3px;height:3px;border-radius:50%;background:var(--ink-faint);}
+  .pill-row{display:flex;justify-content:center;gap:10px;margin-bottom:26px;flex-wrap:wrap;}
+  .pill{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:13px;font-weight:600;
+    padding:7px 14px;border-radius:100px;
+    background:rgba(255,255,255,0.04);color:var(--ink-muted);
+    border:1px solid var(--line);
+  }
+  .pill.outline{background:transparent;color:var(--ink-muted);border-color:var(--line);}
+  .pill .dot{width:6px;height:6px;border-radius:50%;background:var(--accent-bright);}
+  .hero h1{
+    font-size:clamp(32px,5vw,54px);
+    font-weight:700;line-height:1.14;
+    max-width:780px;margin:0 auto 22px;
+  }
+  .hero h1 .accent-word{color:var(--accent-bright);}
+  .hero p.sub{
+    max-width:600px;margin:0 auto 34px;
+    color:var(--ink-muted);font-size:17.5px;line-height:1.6;
+  }
+  .hero-ctas{display:flex;justify-content:center;gap:14px;margin-bottom:52px;flex-wrap:wrap;}
+  .fw-label{
+    font-size:12.5px;color:var(--ink-faint);font-weight:600;
+    text-transform:uppercase;letter-spacing:0.06em;margin-bottom:18px;
+  }
+  .fw-strip{
+    display:flex;justify-content:center;gap:12px;flex-wrap:wrap;max-width:900px;margin:0 auto;
+  }
+  .fw-chip{
+    font-size:13.5px;font-weight:600;
+    padding:9px 16px;border-radius:9px;background:var(--bg-card);
+    border:1px solid var(--line);color:var(--ink-muted);
+  }
+
+  /* signature pulse line in hero */
+  .pulse-wrap{max-width:700px;margin:40px auto 0;opacity:0.9;}
+  .pulse-wrap svg{width:100%;height:auto;display:block;}
+  .pulse-caption{
+    font-size:12.5px;color:var(--ink-faint);font-weight:500;
+    margin-top:10px;
+  }
+
+  /* ---------- SECTION HEADERS ---------- */
+  .sec-head{max-width:640px;margin:0 auto 52px;text-align:center;}
+  .eyebrow{
+    font-size:13px;color:var(--accent-bright);
+    text-transform:uppercase;letter-spacing:0.07em;margin-bottom:10px;font-weight:700;
+  }
+  .sec-head h2{font-size:clamp(26px,3.4vw,36px);margin-bottom:14px;}
+  .sec-head p{color:var(--ink-muted);font-size:16.5px;line-height:1.6;}
+
+  /* ---------- WHY VELOCITY (comparison) ---------- */
+  .why{background:var(--bg-soft);}
+  .compare-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
+  @media (max-width:900px){.compare-grid{grid-template-columns:1fr;}}
+  .compare-col{background:var(--bg-card);padding:26px 22px;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);}
+  .compare-col.is-velocity{background:var(--accent-soft);border-color:var(--accent-bright);}
+  .compare-col .label{
+    font-size:12.5px;text-transform:uppercase;letter-spacing:0.05em;font-weight:700;
+    color:var(--ink-faint);margin-bottom:16px;
+  }
+  .compare-col.is-velocity .label{color:var(--accent-bright);}
+  .compare-col svg{width:100%;height:52px;margin-bottom:18px;display:block;}
+  .compare-col p{font-size:14.5px;color:var(--ink-muted);line-height:1.55;margin:0;}
+  .compare-col.is-velocity p{color:var(--ink);}
+  .compare-col.is-velocity strong{color:#fff;}
+
+  /* ---------- FEATURE GRID ---------- */
+  .feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+  @media (max-width:860px){.feat-grid{grid-template-columns:1fr 1fr;}}
+  @media (max-width:600px){.feat-grid{grid-template-columns:1fr;}}
+  .feat-card{background:var(--bg-card);padding:28px 24px;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);}
+  .feat-icon{
+    width:34px;height:34px;
+    display:flex;align-items:center;justify-content:center;margin-bottom:20px;
+  }
+  .feat-icon svg{width:28px;height:28px;stroke:#fff;}
+  .feat-card h3{font-size:17px;margin-bottom:9px;font-weight:600;color:var(--ink);}
+  .feat-card p{font-size:14.5px;color:var(--ink-muted);line-height:1.6;margin:0;}
+
+  /* ---------- TRUST BAR ---------- */
+  .trust-bar{
+    display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;
+    padding:24px 32px;background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);
+  }
+  .trust-label{font-family:'Poppins';font-weight:600;font-size:14.5px;color:var(--ink);white-space:nowrap;}
+  .trust-badges{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end;}
+  .trust-badge{
+    font-size:11.5px;font-weight:600;color:var(--ink-muted);
+    background:rgba(255,255,255,0.03);border:1px solid var(--line);
+    padding:7px 12px;border-radius:8px;white-space:nowrap;
+  }
+  @media (max-width:820px){.trust-bar{justify-content:center;text-align:center;}.trust-badges{justify-content:center;}}
+
+  /* ---------- FRAMEWORKS ---------- */
+  .fw-groups{display:flex;flex-direction:column;gap:14px;}
+  .fw-row{
+    background:var(--bg-card);display:grid;grid-template-columns:220px 1fr;gap:24px;
+    padding:22px 26px;align-items:center;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);
+  }
+  @media (max-width:720px){.fw-row{grid-template-columns:1fr;gap:14px;}}
+  .fw-row .group-name{font-weight:600;font-size:15px;font-family:'Poppins';color:var(--ink);}
+  .fw-row .group-desc{font-size:13px;color:var(--ink-faint);margin-top:4px;}
+  .fw-tags{display:flex;gap:10px;flex-wrap:wrap;}
+  .fw-tag{
+    font-size:13.5px;padding:8px 14px;border-radius:8px;
+    background:var(--accent-soft);border:1px solid var(--accent-line);color:var(--accent-bright);font-weight:600;
+  }
+  .fw-more{text-align:center;margin-top:28px;}
+  .fw-more a{font-size:14px;color:var(--accent-bright);font-weight:600;text-decoration:none;}
+  .fw-more a:hover{text-decoration:underline;}
+
+  /* ---------- ICP ---------- */
+  .icp{background:var(--bg-soft);}
+  .icp-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;}
+  @media (max-width:1000px){.icp-grid{grid-template-columns:repeat(2,1fr);}}
+  @media (max-width:560px){.icp-grid{grid-template-columns:1fr;}}
+  .icp-card{background:var(--bg-card);padding:24px 20px;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);}
+  .icp-card .tag{
+    font-size:11px;color:var(--accent-bright);
+    text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px;font-weight:700;
+  }
+  .icp-card h3{font-size:15.5px;margin-bottom:9px;font-weight:600;line-height:1.3;color:var(--ink);}
+  .icp-card p{font-size:13.3px;color:var(--ink-muted);line-height:1.55;margin:0;}
+
+  /* ---------- PRICING ---------- */
+  .price-banner{
+    max-width:720px;margin:0 auto 12px;text-align:center;
+    background:var(--accent-soft);border:1px solid var(--accent-line);
+    border-radius:10px;padding:12px 18px;font-size:14px;color:var(--accent-bright);font-weight:600;
+  }
+  .price-note{text-align:center;font-size:13px;color:var(--ink-faint);margin-bottom:44px;font-weight:500;}
+  .price-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;}
+  @media (max-width:1020px){.price-grid{grid-template-columns:repeat(2,1fr);}}
+  @media (max-width:560px){.price-grid{grid-template-columns:1fr;}}
+  .price-card{
+    position:relative;background:var(--bg-card);border:1px solid var(--line);
+    border-radius:var(--radius);padding:26px 22px;box-shadow:var(--shadow);
+  }
+  .price-card.is-featured{border-color:var(--accent-bright);box-shadow:0 0 24px rgba(152,110,245,0.18);}
+  .price-check{
+    position:absolute;top:22px;right:20px;width:22px;height:22px;border-radius:50%;
+    background:var(--accent-bright);display:flex;align-items:center;justify-content:center;
+  }
+  .price-check svg{width:11px;height:11px;stroke:#fff;}
+  .trial-ribbon{
+    display:inline-block;margin-bottom:12px;
+    background:var(--accent-soft);color:var(--accent-bright);
+    font-size:11px;font-weight:700;padding:5px 11px;border-radius:100px;
+    border:1px solid var(--accent-line);
+  }
+  .price-card h3{font-size:16px;font-weight:600;margin-bottom:10px;font-family:'Poppins';color:var(--ink);}
+  .price-card .amount{font-size:30px;font-weight:700;font-family:'Poppins';margin-bottom:2px;color:var(--ink);}
+  .price-card .amount span{font-size:14px;font-weight:500;color:var(--ink-faint);font-family:'Inter';}
+  .price-specs{list-style:none;margin:20px 0 18px;padding:0;font-size:13px;color:var(--ink-muted);}
+  .price-specs li{display:flex;justify-content:space-between;padding:5px 0;}
+  .price-specs li span:first-child{color:var(--ink-faint);}
+  .price-incl{list-style:none;margin:0;padding:16px 0 0;border-top:1px solid var(--line);font-size:12.8px;color:var(--ink-muted);}
+  .price-incl li{display:flex;align-items:center;gap:7px;padding:4px 0;}
+  .price-incl svg{width:13px;height:13px;stroke:var(--accent-bright);flex-shrink:0;}
+  .price-foot{max-width:720px;margin:36px auto 0;text-align:center;font-size:13.5px;color:var(--ink-muted);font-weight:500;}
+  .price-extra{max-width:720px;margin:14px auto 0;font-size:12.5px;color:var(--ink-faint);text-align:center;line-height:1.7;}
+
+  /* ---------- COMPARE TABLE ---------- */
+  .vs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+  @media (max-width:820px){.vs-grid{grid-template-columns:1fr;}}
+  .vs-card{background:var(--bg-card);padding:28px 24px;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);}
+  .vs-card .vs-tag{
+    font-size:12.5px;color:var(--ink-faint);margin-bottom:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;
+  }
+  .vs-card h3{font-size:16.5px;margin-bottom:12px;font-weight:600;color:var(--ink);}
+  .vs-card p{font-size:14px;color:var(--ink-muted);line-height:1.6;margin:0;}
+
+  /* ---------- FAQ ---------- */
+  .faq-list{max-width:760px;margin:0 auto;}
+  details{
+    border-bottom:1px solid var(--line);padding:20px 4px;
+  }
+  details summary{
+    cursor:pointer;font-weight:600;font-size:15.5px;list-style:none;color:var(--ink);
+    display:flex;justify-content:space-between;align-items:center;gap:16px;
+  }
+  details summary::-webkit-details-marker{display:none;}
+  details summary::after{
+    content:'+';font-size:20px;color:var(--accent-bright);
+    flex-shrink:0;transition:transform .15s ease;font-weight:400;
+  }
+  details[open] summary::after{content:'–';}
+  details p{font-size:14.5px;color:var(--ink-muted);line-height:1.65;margin:14px 0 0;}
+  details[open]{background:var(--bg-card);border-radius:10px;border-bottom-color:transparent;margin-bottom:2px;}
+
+  /* ---------- FINAL CTA ---------- */
+  .final-cta{
+    background:
+      radial-gradient(ellipse 700px 400px at 30% 0%, rgba(76,42,180,0.5), transparent 60%),
+      var(--bg-card);
+    color:#fff;text-align:center;border-radius:24px;border:1px solid var(--line);
+    max-width:var(--maxw);margin:0 auto;padding:72px 40px;
+  }
+  .final-cta h2{color:#fff;font-size:clamp(26px,3.6vw,36px);margin-bottom:16px;max-width:640px;margin-left:auto;margin-right:auto;}
+  .final-cta p{color:var(--ink-muted);font-size:15.5px;margin-bottom:30px;}
+  .final-cta .btn{background:var(--accent);}
+  .final-cta .btn:hover{background:var(--accent-dark);}
+
+  footer{padding:40px 0;text-align:center;color:var(--ink-faint);font-size:13px;}
+
+  /* dividers */
+  .divider{height:1px;background:var(--line);max-width:var(--maxw);margin:0 auto;}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap">
+    <div class="brand">
+      <span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4"><path d="M13 2 L3 14h8l-1 8 10-12h-8z" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <div class="brand-text"><span class="name">Cloudways Velocity</span><span class="sub">Managed Node.js Hosting</span></div>
+    </div>
+    <div class="nav-links">
+      <a href="#why">Why Velocity</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <div class="nav-ctas">
+      <a href="#" class="nav-login">Login</a>
+      <a href="#" class="btn small invert">Get Started Free</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header class="hero">
+  <div class="wrap">
+    <div class="product-tag"><span class="name">Cloudways Velocity</span><span class="divider-dot"></span><span>Managed Node.js Hosting</span></div>
+    <div class="pill-row">
+      <span class="pill"><span class="dot"></span>Now in Public Preview</span>
+      <span class="pill outline">No charges during Preview</span>
+    </div>
+    <h1>Managed Node.js Hosting, <span class="accent-word">Always Warm.</span></h1>
+    <p class="sub">Deploy production-ready Node.js apps in minutes. Managed infrastructure, enterprise-grade security, and flat, predictable pricing — no sysadmin, no cold starts, no surprises.</p>
+    <div class="hero-ctas">
+      <a href="#" class="btn">Get Started Free</a>
+      <a href="#why" class="btn ghost">See how it works ↓</a>
+    </div>
+
+    <div class="fw-label">Supports 12 frameworks, out of the box</div>
+    <div class="fw-strip">
+      <span class="fw-chip">NextJS</span>
+      <span class="fw-chip">React</span>
+      <span class="fw-chip">Remix</span>
+      <span class="fw-chip">TanStack</span>
+      <span class="fw-chip">Astro</span>
+      <span class="fw-chip">Nuxt</span>
+      <span class="fw-chip">Svelte</span>
+      <span class="fw-chip">Vite</span>
+      <span class="fw-chip">Express</span>
+      <span class="fw-chip">Fastify</span>
+      <span class="fw-chip">Angular</span>
+      <span class="fw-chip">n8n</span>
+    </div>
+
+    <!-- signature element: persistent pulse vs cold-start gaps -->
+    <div class="pulse-wrap">
+      <svg viewBox="0 0 760 70" fill="none">
+        <path d="M0,35 C20,15 40,55 60,35 C80,15 100,55 120,35 C140,15 160,55 180,35 C200,15 220,55 240,35 C260,15 280,55 300,35 C320,15 340,55 360,35 C380,15 400,55 420,35 C440,15 460,55 480,35 C500,15 520,55 540,35 C560,15 580,55 600,35 C620,15 640,55 660,35 C680,15 700,55 720,35 C730,25 745,45 760,35"
+          stroke="#986EF5" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+      <div class="pulse-caption">// one continuous connection — no spin-up, no idle teardown</div>
+    </div>
+  </div>
+</header>
+
+<!-- ============ WHY VELOCITY ============ -->
+<section class="why" id="why">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">The problem</div>
+      <h2>The Old Way of Hosting Node.js Was Always a Compromise</h2>
+      <p>Serverless punishes growth. Managed PaaS skips security. Raw VPS hands you the ops burden. Velocity was built to remove the trade-off.</p>
+    </div>
+
+    <div class="compare-grid">
+      <div class="compare-col">
+        <div class="label">Serverless</div>
+        <svg viewBox="0 0 220 52"><path d="M0,26 L30,26 M30,26 L30,10 L60,10 L60,26 M90,26 L90,42 L120,42 L120,26 M150,26 L150,8 L180,8 L180,26 M210,26 L220,26" stroke="#9490B0" stroke-width="2" stroke-dasharray="2 4" fill="none"/></svg>
+        <p>Cold starts on every idle request, and a bill that moves with traffic you don't control.</p>
+      </div>
+      <div class="compare-col">
+        <div class="label">Managed PaaS</div>
+        <svg viewBox="0 0 220 52"><path d="M0,26 L220,26" stroke="#9490B0" stroke-width="2" fill="none"/><circle cx="70" cy="26" r="3" fill="#9490B0"/><circle cx="150" cy="26" r="3" fill="#9490B0"/></svg>
+        <p>Friendly onboarding, but WAF, DDoS protection, and CDN are left as an afterthought.</p>
+      </div>
+      <div class="compare-col">
+        <div class="label">Raw VPS / DIY</div>
+        <svg viewBox="0 0 220 52"><path d="M0,30 L20,12 L40,38 L60,8 L80,34 L100,16 L120,40 L140,10 L160,32 L180,14 L200,36 L220,20" stroke="#9490B0" stroke-width="2" fill="none"/></svg>
+        <p>Full control over the server — and now you're the one patching, monitoring, and restarting it.</p>
+      </div>
+      <div class="compare-col is-velocity">
+        <div class="label">Velocity</div>
+        <svg viewBox="0 0 220 52"><path d="M0,26 C15,14 30,38 45,26 C60,14 75,38 90,26 C105,14 120,38 135,26 C150,14 165,38 180,26 C195,14 210,38 220,30" stroke="#986EF5" stroke-width="3" stroke-linecap="round" fill="none"/></svg>
+        <p><strong>Persistent servers, flat pricing, production security</strong> — from day one, with nothing bolted on.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FEATURE GRID ============ -->
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">Platform</div>
+      <h2>Everything You Need to Ship Node.js Apps with Confidence</h2>
+      <p>Stop worrying about servers, security patches, and scaling thresholds. Velocity manages all of it, so your team spends more time writing code that matters.</p>
+    </div>
+
+    <div class="feat-grid">
+      <div class="feat-card">
+        <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2v20M2 12h20" stroke-linecap="round"/></svg></div>
+        <h3>Deploy in Seconds</h3>
+        <p>Connect your GitHub, GitLab, or Bitbucket repo, push, and go live instantly. Every commit triggers a zero-downtime deployment with a traceable preview URL.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
+        <h3>Fully Managed</h3>
+        <p>OS patching, SSL certificates, custom domain mapping, and backups handled automatically — secure and recoverable without lifting a finger.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M13 2 L3 14h8l-1 8 10-12h-8z"/></svg></div>
+        <h3>Optimized by Default</h3>
+        <p>Pre-configured NGINX and PM2 stack with caching built in. 2M+ NPM packages, plus PostgreSQL, MySQL, or MongoDB provisioning on every plan.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+        <h3>Stay in Control</h3>
+        <p>Monitor your entire Node.js service in real time from the dashboard. Start, stop, and scale with one click — CPU, memory, and load always visible.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 3l7 4v5c0 5-3 8-7 9-4-1-7-4-7-9V7z"/></svg></div>
+        <h3>Enterprise-Grade Security</h3>
+        <p>WAF, Malware Protection, DDoS mitigation, and a Cloudflare Enterprise CDN add-on included at no extra cost. Security is on by default.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 19h16M4 15l4-4 4 3 6-8"/></svg></div>
+        <h3>Predictable Pricing, Zero Surprises</h3>
+        <p>Flat monthly plans with no usage-based billing spikes and no hidden fees. Know exactly what you pay, every month.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TRUST BAR ============ -->
+<section style="padding:56px 0;">
+  <div class="wrap">
+    <div class="trust-bar">
+      <span class="trust-label">The Managed Cloud Hosting Leader on G2</span>
+      <div class="trust-badges">
+        <span class="trust-badge">Best Estimated ROI</span>
+        <span class="trust-badge">Hosting Leader — 50 G2 Awards</span>
+        <span class="trust-badge">Best Results, Small Business</span>
+        <span class="trust-badge">High Performer, Mid-Market</span>
+        <span class="trust-badge">Ease of Doing Business</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FRAMEWORKS ============ -->
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">Frameworks</div>
+      <h2>One Platform, Every Way You Build with Node.js</h2>
+      <p>Whatever you're shipping — a full-stack app, a backend API, a content site, an internal tool, or an automation workflow — Velocity has a preset ready for it.</p>
+    </div>
+
+    <div class="fw-groups">
+      <div class="fw-row">
+        <div><div class="group-name">Full-stack React apps</div><div class="group-desc">SSR, SSG &amp; client-side apps</div></div>
+        <div class="fw-tags"><span class="fw-tag">NextJS</span><span class="fw-tag">Remix</span><span class="fw-tag">TanStack</span><span class="fw-tag">React</span></div>
+      </div>
+      <div class="fw-row">
+        <div><div class="group-name">Backend APIs &amp; services</div><div class="group-desc">REST APIs &amp; microservices</div></div>
+        <div class="fw-tags"><span class="fw-tag">Express</span><span class="fw-tag">Fastify</span></div>
+      </div>
+      <div class="fw-row">
+        <div><div class="group-name">Content &amp; performance sites</div><div class="group-desc">Fast, SEO-friendly frontends</div></div>
+        <div class="fw-tags"><span class="fw-tag">Astro</span><span class="fw-tag">Nuxt</span><span class="fw-tag">Svelte</span><span class="fw-tag">Vite</span></div>
+      </div>
+      <div class="fw-row">
+        <div><div class="group-name">Enterprise frontends</div><div class="group-desc">Structured, TypeScript-first</div></div>
+        <div class="fw-tags"><span class="fw-tag">Angular</span></div>
+      </div>
+      <div class="fw-row">
+        <div><div class="group-name">Automation &amp; AI workflows</div><div class="group-desc">Self-hosted, always-on</div></div>
+        <div class="fw-tags"><span class="fw-tag">n8n</span></div>
+      </div>
+    </div>
+    <div class="fw-more"><a href="#">Don't see your framework? Talk to us →</a></div>
+  </div>
+</section>
+
+<!-- ============ ICP ============ -->
+<section class="icp">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">Who it's for</div>
+      <h2>Built for All Teams That Ship Node.js</h2>
+      <p>From solo developers to growing agencies, Velocity is built around how real teams take products from idea to production.</p>
+    </div>
+
+    <div class="icp-grid">
+      <div class="icp-card">
+        <div class="tag">Developers</div>
+        <h3>Developers &amp; Engineers</h3>
+        <p>Full control over your Node.js version, environment variables, build process, and deployment pipeline — without managing a single server.</p>
+      </div>
+      <div class="icp-card">
+        <div class="tag">Agencies</div>
+        <h3>Agencies</h3>
+        <p>Manage every client's Node.js app from one dashboard with consistent infrastructure, predictable monthly costs, and zero server surprises.</p>
+      </div>
+      <div class="icp-card">
+        <div class="tag">Startups</div>
+        <h3>SaaS &amp; Startups</h3>
+        <p>Ship to production from day one without worrying about DevOps processes or configuring a server. Security and CDN included on every plan.</p>
+      </div>
+      <div class="icp-card">
+        <div class="tag">AI builders</div>
+        <h3>AI Builders</h3>
+        <p>Run agentic AI workflows and orchestration layers on persistent servers that are always warm and always connected. No cold starts, no dropped connections.</p>
+      </div>
+      <div class="icp-card">
+        <div class="tag">Founders</div>
+        <h3>Non-Technical Founders</h3>
+        <p>Deploy a production-ready Node.js app without touching SSH, writing server configs, or understanding what a reverse proxy does.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PRICING ============ -->
+<section id="pricing">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">Pricing</div>
+      <h2>Predictable Hosting Costs From Day One</h2>
+      <p>Pick the server that fits your workload today, and scale vertically as your product grows.</p>
+    </div>
+
+    <div class="price-banner">Free during Public Preview. Pricing below applies starting General Availability (Aug 31) — you'll be notified before any charge applies.</div>
+    <div class="price-note">// Starter and Professional include a 3-day free trial at GA — same as Cloudways Flexible</div>
+
+    <div class="price-grid">
+      <div class="price-card is-featured">
+        <span class="price-check"><svg viewBox="0 0 24 24" fill="none" stroke-width="3.5"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="trial-ribbon">3-Day Free Trial</span>
+        <h3>Starter</h3>
+        <div class="amount">$20<span>/month</span></div>
+        <ul class="price-specs">
+          <li><span>vCPUs</span><span>2</span></li>
+          <li><span>RAM</span><span>2GB</span></li>
+          <li><span>CDN Bandwidth</span><span>100GB</span></li>
+          <li><span>Network</span><span>Up to 10 Gbps</span></li>
+        </ul>
+        <ul class="price-incl">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>Enterprise CDN</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>DDoS Protection</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>Malware Protection</li>
+        </ul>
+      </div>
+      <div class="price-card is-featured">
+        <span class="price-check"><svg viewBox="0 0 24 24" fill="none" stroke-width="3.5"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="trial-ribbon">3-Day Free Trial</span>
+        <h3>Professional</h3>
+        <div class="amount">$30<span>/month</span></div>
+        <ul class="price-specs">
+          <li><span>vCPUs</span><span>2</span></li>
+          <li><span>RAM</span><span>4GB</span></li>
+          <li><span>CDN Bandwidth</span><span>200GB</span></li>
+          <li><span>Network</span><span>Up to 10 Gbps</span></li>
+        </ul>
+        <ul class="price-incl">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>Enterprise CDN</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>DDoS Protection</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>Malware Protection</li>
+        </ul>
+      </div>
+      <div class="price-card">
+        <h3>Growth</h3>
+        <div class="amount">$50<span>/month</span></div>
+        <ul class="price-specs">
+          <li><span>vCPUs</span><span>4</span></li>
+          <li><span>RAM</span><span>8GB</span></li>
+          <li><span>CDN Bandwidth</span><span>300GB</span></li>
+          <li><span>Network</span><span>Up to 10 Gbps</span></li>
+        </ul>
+        <ul class="price-incl">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>Enterprise CDN</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>DDoS Protection</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>Malware Protection</li>
+        </ul>
+      </div>
+      <div class="price-card">
+        <h3>Scale</h3>
+        <div class="amount">$100<span>/month</span></div>
+        <ul class="price-specs">
+          <li><span>vCPUs</span><span>8</span></li>
+          <li><span>RAM</span><span>16GB</span></li>
+          <li><span>CDN Bandwidth</span><span>400GB</span></li>
+          <li><span>Network</span><span>Up to 10 Gbps</span></li>
+        </ul>
+        <ul class="price-incl">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>Enterprise CDN</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>DDoS Protection</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>Malware Protection</li>
+        </ul>
+      </div>
+      <div class="price-card">
+        <h3>Plus</h3>
+        <div class="amount">$150<span>/month</span></div>
+        <ul class="price-specs">
+          <li><span>vCPUs</span><span>8</span></li>
+          <li><span>RAM</span><span>32GB</span></li>
+          <li><span>CDN Bandwidth</span><span>500GB</span></li>
+          <li><span>Network</span><span>Up to 10 Gbps</span></li>
+        </ul>
+        <ul class="price-incl">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>Enterprise CDN</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>DDoS Protection</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>Malware Protection</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="price-foot">Upgrade or downgrade anytime — no lock-in.</div>
+    <div class="price-extra">A charge of $0.033/GB applies to offsite backup storage beyond plan allocation.<br>A charge of $0.02/GB applies to CDN bandwidth used beyond plan allocation.</div>
+  </div>
+</section>
+
+<!-- ============ COMPARISON ============ -->
+<section class="why">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">Comparison</div>
+      <h2>Why Teams Choose Velocity Over the Alternatives</h2>
+    </div>
+    <div class="vs-grid">
+      <div class="vs-card">
+        <div class="vs-tag">vs. Vercel / Netlify</div>
+        <h3>Predictable over unpredictable</h3>
+        <p>No cold starts, no usage-based billing surprises — persistent servers at flat monthly pricing.</p>
+      </div>
+      <div class="vs-card">
+        <div class="vs-tag">vs. Render / Railway</div>
+        <h3>Managed, plus enterprise-grade</h3>
+        <p>A similar managed experience, plus enterprise security, CDN, and Cloudways' proven infrastructure reliability.</p>
+      </div>
+      <div class="vs-card">
+        <div class="vs-tag">vs. Raw VPS / DIY</div>
+        <h3>Control without the burden</h3>
+        <p>Full control over your environment, without the server config, patching, or maintenance overhead.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section id="faq">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">FAQ</div>
+      <h2>Questions, Answered</h2>
+    </div>
+
+    <div class="faq-list">
+      <details open>
+        <summary>How is this different from serverless hosting?</summary>
+        <p>Serverless platforms spin up on demand and wind down when idle, introducing cold start latency and usage-based billing. Velocity runs on persistent, always-on servers with consistent response times, flat monthly pricing, and no spin-up delays.</p>
+      </details>
+      <details>
+        <summary>Which frameworks and runtimes are supported?</summary>
+        <p>Velocity supports 12 frameworks out of the box: NextJS, Remix, TanStack, React, Astro, Nuxt, Svelte, Vite, Express, Fastify, Angular, and n8n. Node.js LTS versions 22.x and 24.x are available, selectable per application.</p>
+      </details>
+      <details>
+        <summary>Is it really free during Public Preview?</summary>
+        <p>Yes. There is no charge during Public Preview. Pricing applies from General Availability (Aug 31) onwards.</p>
+      </details>
+      <details>
+        <summary>What databases are available?</summary>
+        <p>PostgreSQL, MySQL, and MongoDB can all be provisioned directly from the dashboard alongside your application. If your app uses an external database or doesn't need one, you can skip provisioning entirely.</p>
+      </details>
+      <details>
+        <summary>Can I use my own Git repository?</summary>
+        <p>Yes. Connect your GitHub, GitLab, or Bitbucket repository, select your deployment branch, and Velocity handles the rest. You can deploy from any branch at any time.</p>
+      </details>
+      <details>
+        <summary>What security features are included on every plan?</summary>
+        <p>Every plan includes a Web Application Firewall, DDoS protection, Malware Protection, and Enterprise CDN.</p>
+      </details>
+      <details>
+        <summary>Can I host multiple apps on one server?</summary>
+        <p>Multi-app hosting on a single server is not available at General Availability. Each application runs on its own isolated server.</p>
+      </details>
+      <details>
+        <summary>Can I change my plan later?</summary>
+        <p>Yes. You can upgrade or downgrade your plan at any time as your workload changes — there's no lock-in.</p>
+      </details>
+      <details>
+        <summary>Is there a free trial?</summary>
+        <p>Starting at General Availability, Starter and Professional plans include a 3-day free trial, so you can test Velocity on a real workload before committing. During Public Preview, access is free for all plans regardless of tier.</p>
+      </details>
+      <details>
+        <summary>What happens when Public Preview ends?</summary>
+        <p>Your app stays live and your data remains intact when Public Preview transitions to General Availability. There is no migration required and no downtime. Pricing will apply from GA onward and you will be notified in advance.</p>
+      </details>
+      <details>
+        <summary>What support is available?</summary>
+        <p>24/7 expert support from the Cloudways team is available on all plans, covering infrastructure and platform issues.</p>
+      </details>
+      <details>
+        <summary>How do I get started?</summary>
+        <p>Public Preview is open. Click Get Started, connect your Git repository, and deploy — no invite required.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FINAL CTA ============ -->
+<section>
+  <div class="wrap">
+    <div class="final-cta">
+      <h2>Ship Your Next Node.js App on Infrastructure That Doesn't Punish Growth</h2>
+      <p>No cold starts. No sysadmin. No surprises on the invoice.</p>
+      <a href="#" class="btn">Get Started Free</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">© 2026 Cloudways, LLC — Cloudways Velocity is Cloudways' Managed Node.js Hosting.</div>
+</footer>
+
+</body>
+</html>
