@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Pac-Man Clone</title>
+<style>
+  :root { color-scheme: dark; }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: #000; color: #fff;
+    font-family: 'Courier New', monospace;
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center;
+  }
+  #wrap { text-align: center; }
+  h1 { color: #ffd800; letter-spacing: 4px; margin: 10px 0; }
+  #hud {
+    display: flex; justify-content: space-between; width: 100%;
+    max-width: 560px; margin: 0 auto 8px; font-size: 18px;
+  }
+  #hud span { color: #ffd800; }
+  canvas {
+    background: #000;
+    border: 4px solid #2121ff;
+    border-radius: 6px;
+    image-rendering: pixelated;
+  }
+  #msg {
+    margin-top: 10px; font-size: 20px; min-height: 28px; color: #ff5555;
+  }
+  #hint {
+    margin-top: 8px; font-size: 13px; color: #888;
+  }
+  button {
+    margin-top: 10px; padding: 8px 18px; font-size: 15px;
+    background: #ffd800; color: #000; border: none; border-radius: 4px;
+    cursor: pointer; font-family: inherit; font-weight: bold;
+  }
+  button:hover { background: #fff; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <h1>PAC-MAN</h1>
+  <div id="hud">
+    <div>SCORE: <span id="score">0</span></div>
+    <div>LIVES: <span id="lives">3</span></div>
+  </div>
+  <canvas id="game" width="560" height="620"></canvas>
+  <div id="msg"></div>
+  <div id="hint">Arrow keys / WASD to move &nbsp;•&nbsp; P to pause</div>
+  <button id="restartBtn" style="display:none;">Play Again</button>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---------- Maze layout ----------
+  // 0 = wall, 1 = path/dot, 2 = empty path (no dot, e.g. after eaten or spawn), 3 = power pellet, 4 = tunnel
+  const rawMap = [
+    "0000000000000000000000000000",
+    "0111111111110001111111111110",
+    "0100010001010010100010001010",
+    "0300010001010010100010001030",
+    "0100000001010010100000001010",
+    "0111111111111111111111111110",
+    "0100010010000000010010001010",
+    "0100010010000000010010001010",
+    "0111111011111011111011111110",
+    "0000010010000000010010000000",
+    "0000010010111110010010000000",
+    "1111110011100011100110111111",
+    "0000000010111110100000000000",
+    "0000000010100010100000000000",
+    "1111111111100011111111111111",
+    "0000000010100010100000000000",
+    "0000000010111110100000000000",
+    "1111110011111111100110111111",
+    "0000010010000000010010000000",
+    "0000010010111110010010000000",
+    "0111111111110001111111111110",
+    "0100010001010010100010001010",
+    "0300011111010010101111100030",
+    "0110010000010010000010011110",
+    "0100010010111111110010001010",
+    "0100010010100000010010001010",
+    "0111111011110111011111111110",
+    "0100000000010010000000001010",
+    "0111111111111111111111111110",
+    "0000000000000000000000000000",
+  ];
+
+  const TILE = 20;
+  const ROWS = rawMap.length;
+  const COLS = rawMap[0].length;
+
+  let grid = rawMap.map(row => row.split("").map(Number));
+
+  function countDots() {
+    let n = 0;
+    for (const row of grid) for (const c of row) if (c === 1 || c === 3) n++;
+    return n;
+  }
+  let dotsRemaining = countDots();
+
+  // ---------- Canvas ----------
+  const canvas = document.getElementById("game");
+  const ctx = canvas.getContext("2d");
+  canvas.width = COLS * TILE;
+  canvas.height = ROWS * TILE;
+
+  const scoreEl = document.getElementById("score");
+  const livesEl = document.getElementById("lives");
+  const msgEl = document.getElementById("msg");
+  const restartBtn = document.getElementById("restartBtn");
+
+  // ---------- Game state ----------
+  let score = 0;
+  let lives = 3;
+  let paused = false;
+  let gameOver = false;
+  let won = false;
+  let frightenedTimer = 0;
+
+  function isWall(row, col) {
+    if (row < 0 || row >= ROWS) return false; // tunnel rows handled separately
+    if (col < 0 || col >= COLS) return true;
+    return grid[row][col] === 0;
+  }
+
+  function wrapCol(col) {
+    if (col < 0) return COLS - 1;
+    if (col >= COLS) return 0;
+    return col;
+  }
+
+  // ---------- Entities ----------
+  const DIRS = {
+    up: { dr: -1, dc: 0 },
+    down: { dr: 1, dc: 0 },
+    left: { dr: 0, dc: -1 },
+    right: { dr: 0, dc: 1 },
+    none: { dr: 0, dc: 0 },
+  };
+
+  function findSpawn(symbolRow, symbolCol) {
+    return { row: symbolRow, col: symbolCol };
+  }
+
+  const player = {
+    row: 22, col: 14,
+    pixelRow: 22, pixelCol: 14,
+    dir: "none", nextDir: "none",
+    speed: 0.09,
+  };
+
+  const ghostColors = ["#ff0000", "#ffb8ff", "#00ffff", "#ffb852"];
+  const ghostStart = [
+    { row: 12, col: 13 },
+    { row: 12, col: 15 },
+    { row: 13, col: 13 },
+    { row: 13, col: 15 },
+  ];
+
+  let ghosts = [];
+
+  function resetGhosts() {
+    ghosts = ghostStart.map((pos, i) => ({
+      row: pos.row, col: pos.col,
+      pixelRow: pos.row, pixelCol: pos.col,
+      dir: "up",
+      color: ghostColors[i],
+      speed: 0.075 + i * 0.005,
+      frightened: false,
+    }));
+  }
+
+  function resetPlayer() {
+    player.row = 22; player.col = 14;
+    player.pixelRow = 22; player.pixelCol = 14;
+    player.dir = "none"; player.nextDir = "none";
+  }
+
+  resetGhosts();
+
+  // ---------- Input ----------
+  const keyMap = {
+    ArrowUp: "up", w: "up", W: "up",
+    ArrowDown: "down", s: "down", S: "down",
+    ArrowLeft: "left", a: "left", A: "left",
+    ArrowRight: "right", d: "right", D: "right",
+  };
+
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "p" || e.key === "P") {
+      if (!gameOver && !won) paused = !paused;
+      return;
+    }
+    const dir = keyMap[e.key];
+    if (dir) {
+      player.nextDir = dir;
+      e.preventDefault();
+    }
+  });
+
+  restartBtn.addEventListener("click", () => {
+    grid = rawMap.map(row => row.split("").map(Number));
+    dotsRemaining = countDots();
+    score = 0; lives = 3; gameOver = false; won = false; paused = false;
+    frightenedTimer = 0;
+    resetPlayer();
+    resetGhosts();
+    scoreEl.textContent = score;
+    livesEl.textContent = lives;
+    msgEl.textContent = "";
+    restartBtn.style.display = "none";
+    requestAnimationFrame(loop);
+  });
+
+  // ---------- Movement helpers ----------
+  function canMove(row, col, dir) {
+    const d = DIRS[dir];
+    if (!d || dir === "none") return false;
+    const targetRow = row + d.dr;
+    let targetCol = col + d.dc;
+    targetCol = wrapCol(targetCol);
+    if (targetRow < 0 || targetRow >= ROWS) return true; // shouldn't happen, but safe
+    return grid[targetRow][targetCol] !== 0;
+  }
+
+  function moveEntity(ent, dir, speed) {
+    const d = DIRS[dir];
+    if (!d) return;
+    ent.pixelRow += d.dr * speed;
+    ent.pixelCol += d.dc * speed;
+
+    // wrap horizontally
+    if (ent.pixelCol < -0.5) ent.pixelCol = COLS - 0.5;
+    if (ent.pixelCol > COLS - 0.5) ent.pixelCol = -0.5;
+
+    ent.row = Math.round(ent.pixelRow);
+    ent.col = Math.round(wrapCol(Math.round(ent.pixelCol)));
+  }
+
+  function atTileCenter(ent) {
+    return Math.abs(ent.pixelRow - Math.round(ent.pixelRow)) < 0.06 &&
+           Math.abs(ent.pixelCol - Math.round(ent.pixelCol)) < 0.06;
+  }
+
+  // ---------- Player update ----------
+  function updatePlayer() {
+    if (atTileCenter(player)) {
+      player.pixelRow = Math.round(player.pixelRow);
+      player.pixelCol = Math.round(player.pixelCol);
+      player.row = player.pixelRow;
+      player.col = wrapCol(player.pixelCol);
+
+      if (player.nextDir !== "none" && canMove(player.row, player.col, player.nextDir)) {
+        player.dir = player.nextDir;
+      }
+      if (player.dir !== "none" && !canMove(player.row, player.col, player.dir)) {
+        player.dir = "none";
+      }
+
+      // eat dot/pellet
+      const cell = grid[player.row][player.col];
+      if (cell === 1) {
+        grid[player.row][player.col] = 2;
+        score += 10;
+        dotsRemaining--;
+      } else if (cell === 3) {
+        grid[player.row][player.col] = 2;
+        score += 50;
+        dotsRemaining--;
+        frightenedTimer = 300; // frames
+        ghosts.forEach(g => g.frightened = true);
+      }
+      scoreEl.textContent = score;
+
+      if (dotsRemaining <= 0) {
+        won = true;
+      }
+    }
+
+    if (player.dir !== "none") {
+      moveEntity(player, player.dir, player.speed);
+    }
+  }
+
+  // ---------- Ghost AI ----------
+  function possibleDirs(row, col, excludeDir) {
+    const opposite = { up: "down", down: "up", left: "right", right: "left" };
+    const dirs = [];
+    for (const dir of Object.keys(DIRS)) {
+      if (dir === "none") continue;
+      if (excludeDir && dir === opposite[excludeDir]) continue;
+      if (canMove(row, col, dir)) dirs.push(dir);
+    }
+    if (dirs.length === 0 && excludeDir) {
+      // dead end, allow reversing
+      if (canMove(row, col, opposite[excludeDir])) dirs.push(opposite[excludeDir]);
+    }
+    return dirs;
+  }
+
+  function distance(r1, c1, r2, c2) {
+    return Math.abs(r1 - r2) + Math.abs(c1 - c2);
+  }
+
+  function updateGhost(g) {
+    if (atTileCenter(g)) {
+      g.pixelRow = Math.round(g.pixelRow);
+      g.pixelCol = Math.round(g.pixelCol);
+      g.row = g.pixelRow;
+      g.col = wrapCol(g.pixelCol);
+
+      const options = possibleDirs(g.row, g.col, g.dir);
+      if (options.length > 0) {
+        let chosen;
+        if (g.frightened) {
+          // run away / random
+          chosen = options[Math.floor(Math.random() * options.length)];
+        } else if (Math.random() < 0.2) {
+          chosen = options[Math.floor(Math.random() * options.length)];
+        } else {
+          // greedy chase toward player
+          let best = options[0];
+          let bestDist = Infinity;
+          for (const dir of options) {
+            const d = DIRS[dir];
+            const nr = g.row + d.dr;
+            const nc = wrapCol(g.col + d.dc);
+            const dist = distance(nr, nc, player.row, player.col);
+            if (dist < bestDist) { bestDist = dist; best = dir; }
+          }
+          chosen = best;
+        }
+        g.dir = chosen;
+      }
+    }
+    moveEntity(g, g.dir, g.frightened ? g.speed * 0.6 : g.speed);
+  }
+
+  function checkCollisions() {
+    for (const g of ghosts) {
+      if (distance(g.row, g.col, player.row, player.col) === 0 &&
+          Math.abs(g.pixelRow - player.pixelRow) < 0.5 &&
+          Math.abs(g.pixelCol - player.pixelCol) < 0.5) {
+        if (g.frightened) {
+          score += 200;
+          scoreEl.textContent = score;
+          g.row = ghostStart[ghosts.indexOf(g)].row;
+          g.col = ghostStart[ghosts.indexOf(g)].col;
+          g.pixelRow = g.row; g.pixelCol = g.col;
+          g.frightened = false;
+        } else {
+          lives--;
+          livesEl.textContent = lives;
+          if (lives <= 0) {
+            gameOver = true;
+          } else {
+            resetPlayer();
+            resetGhosts();
+          }
+          return;
+        }
+      }
+    }
+  }
+
+  // ---------- Rendering ----------
+  function drawMaze() {
+    ctx.fillStyle = "#000";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        const cell = grid[r][c];
+        const x = c * TILE;
+        const y = r * TILE;
+        if (cell === 0) {
+          ctx.fillStyle = "#0d0dbf";
+          ctx.fillRect(x + 1, y + 1, TILE - 2, TILE - 2);
+        } else if (cell === 1) {
+          ctx.fillStyle = "#ffd8a8";
+          ctx.beginPath();
+          ctx.arc(x + TILE / 2, y + TILE / 2, 2.5, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (cell === 3) {
+          ctx.fillStyle = "#ffd8a8";
+          ctx.beginPath();
+          ctx.arc(x + TILE / 2, y + TILE / 2, 6, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    }
+  }
+
+  function drawPlayer() {
+    const x = (player.pixelCol + 0.5) * TILE;
+    const y = (player.pixelRow + 0.5) * TILE;
+    const r = TILE / 2 - 2;
+    const mouth = (Math.floor(Date.now() / 100) % 2 === 0) ? 0.25 : 0.05;
+
+    let startAngle = mouth * Math.PI;
+    let endAngle = (2 - mouth) * Math.PI;
+    let rotation = 0;
+    if (player.dir === "left") rotation = Math.PI;
+    else if (player.dir === "up") rotation = -Math.PI / 2;
+    else if (player.dir === "down") rotation = Math.PI / 2;
+
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(rotation);
+    ctx.fillStyle = "#ffd800";
+    ctx.beginPath();
+    ctx.arc(0, 0, r, startAngle, endAngle);
+    ctx.lineTo(0, 0);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawGhost(g) {
+    const x = (g.pixelCol + 0.5) * TILE;
+    const y = (g.pixelRow + 0.5) * TILE;
+    const r = TILE / 2 - 2;
+    ctx.fillStyle = g.frightened ? "#3333ff" : g.color;
+    ctx.beginPath();
+    ctx.arc(x, y, r, Math.PI, 0, false);
+    ctx.lineTo(x + r, y + r);
+    for (let i = 0; i < 3; i++) {
+      ctx.lineTo(x + r - (r * 2 / 3) * (i + 0.5), y + r - 4);
+      ctx.lineTo(x + r - (r * 2 / 3) * (i + 1), y + r);
+    }
+    ctx.closePath();
+    ctx.fill();
+
+    // eyes
+    ctx.fillStyle = "#fff";
+    ctx.beginPath();
+    ctx.arc(x - 4, y - 2, 3, 0, Math.PI * 2);
+    ctx.arc(x + 4, y - 2, 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#000";
+    ctx.beginPath();
+    ctx.arc(x - 4, y - 2, 1.3, 0, Math.PI * 2);
+    ctx.arc(x + 4, y - 2, 1.3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // ---------- Main loop ----------
+  function loop() {
+    if (gameOver) {
+      msgEl.textContent = "GAME OVER";
+      restartBtn.style.display = "inline-block";
+      drawMaze();
+      drawPlayer();
+      ghosts.forEach(drawGhost);
+      return;
+    }
+    if (won) {
+      msgEl.textContent = "YOU WIN! 🎉";
+      restartBtn.style.display = "inline-block";
+      drawMaze();
+      drawPlayer();
+      ghosts.forEach(drawGhost);
+      return;
+    }
+    if (paused) {
+      msgEl.textContent = "PAUSED (press P)";
+      requestAnimationFrame(loop);
+      return;
+    }
+    msgEl.textContent = "";
+
+    if (frightenedTimer > 0) {
+      frightenedTimer--;
+      if (frightenedTimer === 0) ghosts.forEach(g => g.frightened = false);
+    }
+
+    updatePlayer();
+    ghosts.forEach(updateGhost);
+    checkCollisions();
+
+    drawMaze();
+    drawPlayer();
+    ghosts.forEach(drawGhost);
+
+    requestAnimationFrame(loop);
+  }
+
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
